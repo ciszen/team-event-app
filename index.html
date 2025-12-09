@@ -751,7 +751,7 @@
             <p style="color:var(--text-secondary); margin:0;">みんなで楽しいイベントを計画しよう！</p>
         </div>
         <div style="max-width:400px; margin:0 auto;">
-            <label>社員番号</label>
+            <label>J社員番号</label>
             <p style="font-size:0.85rem; color:var(--text-tertiary); margin-top:0;">J社員番号をJなしで入力してください</p>
             <input type="text" id="loginNo" class="input-text" placeholder="12345" autocomplete="off">
             <button class="btn" style="width:100%; margin-top:8px;" onclick="app.login()">ログイン →</button>
@@ -837,7 +837,7 @@
                 <h4 style="margin:0 0 8px 0;">👤 新規ユーザー登録（管理者）</h4>
                 <label style="margin-top:8px;">名前</label>
                 <input type="text" id="regName" class="input-text" placeholder="例: 山田 太郎">
-                <label>社員番号</label>
+                <label>J社員番号</label>
                 <input type="text" id="regNo" class="input-text" placeholder="例: 12345">
                 <div style="display:flex; gap:12px; margin-top:8px;">
                     <button class="btn btn-outline" style="flex:1;" onclick="app.registerUser()">ユーザー登録</button>
@@ -1103,16 +1103,16 @@ const app = {
         const syainNumber = document.getElementById('regNo').value.trim();
         
         if(!name || !syainNumber) {
-            return app.showToast("名前と社員番号を入力してください", 'error');
+            return app.showToast("名前とJ社員番号を入力してください", 'error');
         }
         
         if (!utils.isValidSyainNumber(syainNumber)) {
-            return app.showToast("社員番号は数字のみで入力してください", 'error');
+            return app.showToast("J社員番号は数字のみで入力してください", 'error');
         }
 
         // 重複チェック
         if(app.data.users.find(u => u.syainNumber === syainNumber)) {
-            return app.showToast("この社員番号は登録済みです", 'error');
+            return app.showToast("このJ社員番号は登録済みです", 'error');
         }
 
         await app.loadData();
@@ -1127,11 +1127,11 @@ const app = {
     login: async () => {
         const syainNumber = document.getElementById('loginNo').value.trim();
         if(!syainNumber) {
-            return app.showToast("社員番号を入力してください", 'error');
+            return app.showToast("J社員番号を入力してください", 'error');
         }
         
         if (!utils.isValidSyainNumber(syainNumber)) {
-            return app.showToast("社員番号は数字のみで入力してください", 'error');
+            return app.showToast("J社員番号は数字のみで入力してください", 'error');
         }
 
         await app.loadData();
@@ -1765,7 +1765,7 @@ const app = {
             return;
         }
 
-        let html = '<div class="table-container"><table><thead><tr><th>名前</th><th>社員番号</th><th>操作</th></tr></thead><tbody>';
+        let html = '<div class="table-container"><table><thead><tr><th>名前</th><th>J社員番号</th><th>操作</th></tr></thead><tbody>';
         app.data.users.forEach((user, index) => {
             html += `<tr>
                 <td><input type="text" value="${utils.escapeHtml(user.name)}" id="name-${index}" class="input-text" style="width:180px; margin:0;"></td>
@@ -1785,16 +1785,16 @@ const app = {
         const newSyain = document.getElementById(`syain-${index}`).value.trim();
         
         if (!newName || !newSyain) {
-            return app.showToast("名前と社員番号を入力してください", 'error');
+            return app.showToast("名前とJ社員番号を入力してください", 'error');
         }
         
         if (!utils.isValidSyainNumber(newSyain)) {
-            return app.showToast("社員番号は数字のみで入力してください", 'error');
+            return app.showToast("J社員番号は数字のみで入力してください", 'error');
         }
         
         // 重複チェック
         if (app.data.users.some((u, i) => i !== index && u.syainNumber === newSyain)) {
-            return app.showToast("この社員番号は既に使用されています", 'error');
+            return app.showToast("このJ社員番号は既に使用されています", 'error');
         }
         
         await app.loadData();
