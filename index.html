@@ -790,6 +790,10 @@
         <input type="text" id="newEvtName" class="input-text" placeholder="例：12月度 懇親会 🍻">
         <label>候補日（カンマ区切り、または複数行）</label>
         <textarea id="newEvtDates" class="input-text" rows="4" placeholder="2025/12/10&#13;2025/12/15&#13;2025/12/20"></textarea>
+        <label>開催場所（任意）</label>
+        <input type="text" id="newEvtLocation" class="input-text" placeholder="例: 渋谷 居酒屋 さくら">
+        <label>お店のURL（任意）</label>
+        <input type="url" id="newEvtUrl" class="input-text" placeholder="https://example.com/restaurant">
         <p style="font-size:0.85rem; color:var(--text-tertiary); margin-top:-8px;">YYYY/MM/DD または YYYY-MM-DD 形式で入力してください</p>
         <div style="margin-top:20px; display:flex; gap:12px;">
             <button class="btn btn-success" onclick="app.createEvent()">🚀 作成して公開</button>
@@ -876,6 +880,10 @@
             <option value="LOTTERY">座席抽選中</option>
             <option value="CLOSED">決定済</option>
         </select>
+        <label>開催場所（任意）</label>
+        <input type="text" id="editEvtLocation" class="input-text" placeholder="例: 渋谷 居酒屋 さくら">
+        <label>お店のURL（任意）</label>
+        <input type="url" id="editEvtUrl" class="input-text" placeholder="https://example.com/restaurant">
         <div style="margin-top:20px; display:flex; gap:12px;">
             <button class="btn" onclick="app.saveEditEvent()">💾 保存</button>
             <button class="btn btn-outline" onclick="app.router('viewEventManagement')">キャンセル</button>
@@ -919,6 +927,17 @@ const utils = {
     // 社員番号バリデーション（数字のみ）
     isValidSyainNumber: (num) => {
         return /^\d+$/.test(num);
+    },
+    
+    // 簡易URLバリデーション
+    isValidUrl: (url) => {
+        if (!url) return true;
+        try {
+            const u = new URL(url);
+            return u.protocol === 'http:' || u.protocol === 'https:';
+        } catch (e) {
+            return false;
+        }
     },
     
     // デバウンス関数
@@ -1201,6 +1220,8 @@ const app = {
     createEvent: async () => {
         const name = document.getElementById('newEvtName').value.trim();
         const datesText = document.getElementById('newEvtDates').value.trim();
+        const location = document.getElementById('newEvtLocation').value.trim();
+        const url = document.getElementById('newEvtUrl').value.trim();
         
         if(!name || !datesText) {
             return app.showToast("入力項目が不足しています", 'error');
@@ -1219,6 +1240,8 @@ const app = {
             name: name,
             organizerNo: app.currentUser.syainNumber,
             candidates: candidates,
+            location: location || null,
+            url: url || null,
             status: 'PLANNING',
             fixedDate: null,
             responses: {},
@@ -1285,6 +1308,8 @@ const app = {
                         <strong style="font-size:1.1rem;">${statusInfo.icon} ${utils.escapeHtml(evt.name)}</strong>
                         <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:6px;">
                             👑 幹事：${orgName} &nbsp;|&nbsp; 📅 候補日 ${evt.candidates.length}件 &nbsp;|&nbsp; 👥 回答 ${responseCount}件
+                            ${evt.location ? '&nbsp;|&nbsp; 📍 ' + utils.escapeHtml(evt.location) : ''}
+                            ${evt.url ? '&nbsp;<a href="' + utils.escapeHtml(evt.url) + '" target="_blank" rel="noopener">🔗</a>' : ''}
                         </div>
                     </div>
                     <span class="status-badge ${statusInfo.class}">${statusInfo.text}</span>
@@ -1302,6 +1327,10 @@ const app = {
                         <option value="LOTTERY" ${evt.status === 'LOTTERY' ? 'selected' : ''}>🎲 座席抽選中</option>
                         <option value="CLOSED" ${evt.status === 'CLOSED' ? 'selected' : ''}>✅ 決定済</option>
                     </select>
+                    <label>開催場所（任意）</label>
+                    <input type="text" id="editLocation-${evt.id}" class="input-text" value="${evt.location ? utils.escapeHtml(evt.location) : ''}">
+                    <label>お店のURL（任意）</label>
+                    <input type="url" id="editUrl-${evt.id}" class="input-text" value="${evt.url ? utils.escapeHtml(evt.url) : ''}">
                     <div style="margin-top:12px; display:flex; gap:10px;">
                         <button class="btn" onclick="event.stopPropagation(); app.saveEditEventInline('${evt.id}', { showDashboard:false })">💾 保存</button>
                         <button class="btn btn-outline" onclick="event.stopPropagation(); app.cancelEditInline('${evt.id}')">キャンセル</button>
@@ -1365,7 +1394,9 @@ const app = {
         const orgUser = app.data.users.find(u => u.syainNumber === evt.organizerNo);
         const orgName = orgUser ? utils.escapeHtml(orgUser.name) : evt.organizerNo;
         document.getElementById('detailTitle').textContent = evt.name;
-        document.getElementById('detailMeta').innerHTML = `👑 幹事: ${orgName}`;
+        document.getElementById('detailMeta').innerHTML = `👑 幹事: ${orgName}` +
+            `${evt.location ? ' &nbsp;|&nbsp; 📍 ' + utils.escapeHtml(evt.location) : ''}` +
+            `${evt.url ? ' &nbsp;<a href="' + utils.escapeHtml(evt.url) + '" target="_blank" rel="noopener">お店のページ</a>' : ''}`;
         
         // DOM要素をリセット
         document.getElementById('voteList').innerHTML = '';
@@ -2001,6 +2032,8 @@ const app = {
         const name = document.getElementById('editEvtName').value.trim();
         const datesText = document.getElementById('editEvtDates').value.trim();
         const status = document.getElementById('editEvtStatus').value;
+        const location = document.getElementById('editEvtLocation').value.trim();
+        const url = document.getElementById('editEvtUrl').value.trim();
         
         if (!name || !datesText) {
             return app.showToast("入力項目が不足しています", 'error');
@@ -2019,6 +2052,8 @@ const app = {
             memoryEvt.name = name;
             memoryEvt.candidates = candidates;
             memoryEvt.status = status;
+            memoryEvt.location = location || null;
+            memoryEvt.url = url || null;
         }
 
         await app.loadData();
@@ -2031,6 +2066,8 @@ const app = {
         targetEvt.name = name;
         targetEvt.candidates = candidates;
         targetEvt.status = status;
+        targetEvt.location = location || null;
+        targetEvt.url = url || null;
         targetEvt.updatedAt = new Date().toISOString();
         
         if (await app.saveData()) {
@@ -2048,6 +2085,8 @@ const app = {
         const name = document.getElementById(`editName-${eventId}`).value.trim();
         const datesText = document.getElementById(`editDates-${eventId}`).value.trim();
         const status = document.getElementById(`editStatus-${eventId}`).value;
+        const location = document.getElementById(`editLocation-${eventId}`)?.value?.trim() || '';
+        const url = document.getElementById(`editUrl-${eventId}`)?.value?.trim() || '';
         
         if (!name || !datesText) {
             return app.showToast("入力項目が不足しています", 'error');
@@ -2064,6 +2103,8 @@ const app = {
             memoryEvt.name = name;
             memoryEvt.candidates = candidates;
             memoryEvt.status = status;
+            memoryEvt.location = location || null;
+            memoryEvt.url = url || null;
         }
 
         await app.loadData();
@@ -2076,6 +2117,8 @@ const app = {
         targetEvt.name = name;
         targetEvt.candidates = candidates;
         targetEvt.status = status;
+        targetEvt.location = location || null;
+        targetEvt.url = url || null;
         targetEvt.updatedAt = new Date().toISOString();
         
         if (await app.saveData()) {
