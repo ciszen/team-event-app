@@ -756,16 +756,7 @@
             <input type="text" id="loginNo" class="input-text" placeholder="12345" autocomplete="off">
             <button class="btn" style="width:100%; margin-top:8px;" onclick="app.login()">ログイン →</button>
         </div>
-        <details>
-            <summary>👤 管理者メニュー（ユーザー登録）</summary>
-            <div>
-                <label>名前</label>
-                <input type="text" id="regName" class="input-text" placeholder="例: 山田 太郎">
-                <label>社員番号</label>
-                <input type="text" id="regNo" class="input-text" placeholder="例: 12345">
-                <button class="btn btn-outline" style="width:100%;" onclick="app.registerUser()">ユーザーを登録</button>
-            </div>
-        </details>
+        <!-- 管理者登録フォームはユーザー管理画面に移動しました -->
     </div>
 
     <div id="viewDashboard" class="view">
@@ -841,6 +832,19 @@
     <div id="viewUserManagement" class="view">
         <button class="btn btn-outline" onclick="app.showDashboard()" style="margin-bottom:24px;">← 一覧に戻る</button>
         <h3>👥 ユーザー管理</h3>
+        <div style="margin-top:12px; margin-bottom:18px;">
+            <div style="background:var(--bg-secondary); padding:16px; border-radius:12px; border:1px solid var(--border);">
+                <h4 style="margin:0 0 8px 0;">👤 新規ユーザー登録（管理者）</h4>
+                <label style="margin-top:8px;">名前</label>
+                <input type="text" id="regName" class="input-text" placeholder="例: 山田 太郎">
+                <label>社員番号</label>
+                <input type="text" id="regNo" class="input-text" placeholder="例: 12345">
+                <div style="display:flex; gap:12px; margin-top:8px;">
+                    <button class="btn btn-outline" style="flex:1;" onclick="app.registerUser()">ユーザー登録</button>
+                    <button class="btn" style="flex:1;" onclick="(function(){ document.getElementById('regName').value=''; document.getElementById('regNo').value=''; })()">クリア</button>
+                </div>
+            </div>
+        </div>
         <div id="userList" style="margin-top:20px;"></div>
     </div>
 
