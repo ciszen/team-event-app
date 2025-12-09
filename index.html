@@ -230,7 +230,17 @@
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--border);
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+        }
+
+        /* 企画中などでクリック不可を表すクラス */
+        .card.no-pointer { 
+            cursor: default;
+        }
+
+        .card.no-pointer:hover {
+            transform: none;
+            box-shadow: var(--shadow-sm);
         }
 
         .card::before {
@@ -328,6 +338,27 @@
             opacity: 0.3;
             pointer-events: none;
             filter: blur(2px);
+        }
+
+        .card.expanded {
+            min-height: 400px;
+            overflow-y: auto;
+            /* only show vertical scrollbar when needed */
+            max-height: 70vh;
+        }
+
+        /* 編集モード時のコントロール切替 */
+        .controls-edit { display: none; }
+        .card.expanded .controls-default { display: none; }
+        .card.expanded .controls-edit { display: flex; gap:10px; }
+
+        /* 編集モードのカードでは入力系以外をクリック不可にする */
+        .card.expanded { pointer-events: none; }
+        .card.expanded .edit-panel,
+        .card.expanded .edit-panel *,
+        .card.expanded .controls-edit,
+        .card.expanded .controls-edit * {
+            pointer-events: auto;
         }
 
         /* Toast Notifications - Floating style */
@@ -790,11 +821,10 @@
         <input type="text" id="newEvtName" class="input-text" placeholder="例：12月度 懇親会 🍻">
         <label>候補日（カンマ区切り、または複数行）</label>
         <textarea id="newEvtDates" class="input-text" rows="4" placeholder="2025/12/10&#13;2025/12/15&#13;2025/12/20"></textarea>
-        <label>開催場所（任意）</label>
-        <input type="text" id="newEvtLocation" class="input-text" placeholder="例: 渋谷 居酒屋 さくら">
-        <label>お店のURL（任意）</label>
-        <input type="url" id="newEvtUrl" class="input-text" placeholder="https://example.com/restaurant">
         <p style="font-size:0.85rem; color:var(--text-tertiary); margin-top:-8px;">YYYY/MM/DD または YYYY-MM-DD 形式で入力してください</p>
+        <label>お店情報（任意）</label>
+        <textarea id="newEvtShopInfo" class="input-text" rows="4" placeholder="例:&#13;店名: レストランABC&#13;URL: https://example.com&#13;住所: 東京都渋谷区..."></textarea>
+        <p style="font-size:0.85rem; color:var(--text-tertiary); margin-top:-8px;">店名、URL、住所など複数行で入力できます</p>
         <div style="margin-top:20px; display:flex; gap:12px;">
             <button class="btn btn-success" onclick="app.createEvent()">🚀 作成して公開</button>
             <button class="btn btn-outline" onclick="app.router('viewDashboard')">キャンセル</button>
@@ -873,6 +903,8 @@
         <input type="text" id="editEvtName" class="input-text">
         <label>候補日（カンマ区切り、または複数行）</label>
         <textarea id="editEvtDates" class="input-text" rows="4"></textarea>
+        <label>お店情報（任意）</label>
+        <textarea id="editEvtShopInfo" class="input-text" rows="4"></textarea>
         <label>ステータス</label>
         <select id="editEvtStatus" class="input-text">
             <option value="PLANNING">企画中</option>
@@ -880,10 +912,6 @@
             <option value="LOTTERY">座席抽選中</option>
             <option value="CLOSED">決定済</option>
         </select>
-        <label>開催場所（任意）</label>
-        <input type="text" id="editEvtLocation" class="input-text" placeholder="例: 渋谷 居酒屋 さくら">
-        <label>お店のURL（任意）</label>
-        <input type="url" id="editEvtUrl" class="input-text" placeholder="https://example.com/restaurant">
         <div style="margin-top:20px; display:flex; gap:12px;">
             <button class="btn" onclick="app.saveEditEvent()">💾 保存</button>
             <button class="btn btn-outline" onclick="app.router('viewEventManagement')">キャンセル</button>
@@ -927,17 +955,6 @@ const utils = {
     // 社員番号バリデーション（数字のみ）
     isValidSyainNumber: (num) => {
         return /^\d+$/.test(num);
-    },
-    
-    // 簡易URLバリデーション
-    isValidUrl: (url) => {
-        if (!url) return true;
-        try {
-            const u = new URL(url);
-            return u.protocol === 'http:' || u.protocol === 'https:';
-        } catch (e) {
-            return false;
-        }
     },
     
     // デバウンス関数
@@ -1214,14 +1231,14 @@ const app = {
     showCreateEvent: () => {
         document.getElementById('newEvtName').value = "";
         document.getElementById('newEvtDates').value = "";
+        document.getElementById('newEvtShopInfo').value = "";
         app.router('viewCreate');
     },
 
     createEvent: async () => {
         const name = document.getElementById('newEvtName').value.trim();
         const datesText = document.getElementById('newEvtDates').value.trim();
-        const location = document.getElementById('newEvtLocation').value.trim();
-        const url = document.getElementById('newEvtUrl').value.trim();
+        const shopInfo = document.getElementById('newEvtShopInfo').value.trim();
         
         if(!name || !datesText) {
             return app.showToast("入力項目が不足しています", 'error');
@@ -1240,8 +1257,7 @@ const app = {
             name: name,
             organizerNo: app.currentUser.syainNumber,
             candidates: candidates,
-            location: location || null,
-            url: url || null,
+            shopInfo: shopInfo || null,
             status: 'PLANNING',
             fixedDate: null,
             responses: {},
@@ -1286,18 +1302,24 @@ const app = {
             const statusInfo = statusMap[evt.status] || { text: evt.status, class: 'status-closed', icon: '📋' };
 
             const div = document.createElement('div');
-            div.className = 'card';
+            div.className = 'card' + (evt.status === 'PLANNING' ? ' no-pointer' : '');
             
             // 参加者数を計算
             const responseCount = Object.keys(evt.responses || {}).length;
             
-            // 幹事の場合のみ編集・削除ボタンを表示
+            // 幹事の場合のみ、通常表示の編集/削除と編集モード時の保存/キャンセルを切替表示
             let controlsHtml = '';
             if (app.currentUser && app.currentUser.syainNumber === evt.organizerNo) {
                 controlsHtml = `
-                    <div style="margin-top:12px; display:flex; gap:10px;">
-                        <button class="btn btn-outline" style="padding:8px 16px; font-size:0.85rem;" onclick="event.stopPropagation(); app.editEvent('${evt.id}')">✏️ 編集</button>
-                        <button class="btn btn-danger" style="padding:8px 16px; font-size:0.85rem;" onclick="event.stopPropagation(); app.deleteEvent('${evt.id}')">🗑️ 削除</button>
+                    <div style="margin-top:12px; display:flex; gap:10px; align-items:center;">
+                        <div class="controls-default" style="display:flex; gap:10px;">
+                            <button class="btn btn-outline" style="padding:8px 16px; font-size:0.85rem;" onclick="event.stopPropagation(); app.editEvent('${evt.id}')">✏️ 編集</button>
+                            <button class="btn btn-danger" style="padding:8px 16px; font-size:0.85rem;" onclick="event.stopPropagation(); app.deleteEvent('${evt.id}')">🗑️ 削除</button>
+                        </div>
+                        <div class="controls-edit" style="display:none;">
+                            <button class="btn" style="padding:8px 16px; font-size:0.85rem;" onclick="event.stopPropagation(); app.saveEditEventInline('${evt.id}', { showDashboard:false })">💾 保存</button>
+                            <button class="btn btn-outline" style="padding:8px 16px; font-size:0.85rem;" onclick="event.stopPropagation(); app.cancelEditInline('${evt.id}')">キャンセル</button>
+                        </div>
                     </div>
                 `;
             }
@@ -1308,8 +1330,6 @@ const app = {
                         <strong style="font-size:1.1rem;">${statusInfo.icon} ${utils.escapeHtml(evt.name)}</strong>
                         <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:6px;">
                             👑 幹事：${orgName} &nbsp;|&nbsp; 📅 候補日 ${evt.candidates.length}件 &nbsp;|&nbsp; 👥 回答 ${responseCount}件
-                            ${evt.location ? '&nbsp;|&nbsp; 📍 ' + utils.escapeHtml(evt.location) : ''}
-                            ${evt.url ? '&nbsp;<a href="' + utils.escapeHtml(evt.url) + '" target="_blank" rel="noopener">🔗</a>' : ''}
                         </div>
                     </div>
                     <span class="status-badge ${statusInfo.class}">${statusInfo.text}</span>
@@ -1327,24 +1347,23 @@ const app = {
                         <option value="LOTTERY" ${evt.status === 'LOTTERY' ? 'selected' : ''}>🎲 座席抽選中</option>
                         <option value="CLOSED" ${evt.status === 'CLOSED' ? 'selected' : ''}>✅ 決定済</option>
                     </select>
-                    <label>開催場所（任意）</label>
-                    <input type="text" id="editLocation-${evt.id}" class="input-text" value="${evt.location ? utils.escapeHtml(evt.location) : ''}">
-                    <label>お店のURL（任意）</label>
-                    <input type="url" id="editUrl-${evt.id}" class="input-text" value="${evt.url ? utils.escapeHtml(evt.url) : ''}">
-                    <div style="margin-top:12px; display:flex; gap:10px;">
-                        <button class="btn" onclick="event.stopPropagation(); app.saveEditEventInline('${evt.id}', { showDashboard:false })">💾 保存</button>
-                        <button class="btn btn-outline" onclick="event.stopPropagation(); app.cancelEditInline('${evt.id}')">キャンセル</button>
-                    </div>
+                    <label>お店情報（任意）</label>
+                    <textarea id="editShopInfo-${evt.id}" class="input-text" rows="3">${utils.escapeHtml(evt.shopInfo || '')}</textarea>
                 </div>
             `;
             
             const eventId = evt.id;
             div.addEventListener('click', (e) => {
-                // 編集パネルが開いていれば閉じる
+                // 編集中のカードはクリックを無視（入力要素以外）
+                if (div.classList.contains('expanded')) {
+                    return;
+                }
+                // 編集パネルが開いていれば閉じる（別カードの編集を閉じる）
                 const openPanel = document.querySelector('.edit-panel.open');
                 if (openPanel) {
                     openPanel.classList.remove('open');
                     document.querySelectorAll('.card.dimmed').forEach(c => c.classList.remove('dimmed'));
+                    document.querySelectorAll('.card.expanded').forEach(c => c.classList.remove('expanded'));
                     return;
                 }
                 // 最新データからイベントを取得
@@ -1394,9 +1413,11 @@ const app = {
         const orgUser = app.data.users.find(u => u.syainNumber === evt.organizerNo);
         const orgName = orgUser ? utils.escapeHtml(orgUser.name) : evt.organizerNo;
         document.getElementById('detailTitle').textContent = evt.name;
-        document.getElementById('detailMeta').innerHTML = `👑 幹事: ${orgName}` +
-            `${evt.location ? ' &nbsp;|&nbsp; 📍 ' + utils.escapeHtml(evt.location) : ''}` +
-            `${evt.url ? ' &nbsp;<a href="' + utils.escapeHtml(evt.url) + '" target="_blank" rel="noopener">お店のページ</a>' : ''}`;
+        let metaHtml = `👑 幹事: ${orgName}`;
+        if (evt.shopInfo) {
+            metaHtml += `<br>🏪 お店情報: ${utils.escapeHtml(evt.shopInfo).replace(/\n/g, '<br>')}`;
+        }
+        document.getElementById('detailMeta').innerHTML = metaHtml;
         
         // DOM要素をリセット
         document.getElementById('voteList').innerHTML = '';
@@ -1945,7 +1966,7 @@ const app = {
             const statusInfo = statusMap[evt.status] || { text: evt.status, class: 'status-closed', icon: '📋' };
             
             const div = document.createElement('div');
-            div.className = 'card';
+            div.className = 'card' + (evt.status === 'PLANNING' ? ' no-pointer' : '');
             div.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <strong>${statusInfo.icon} ${utils.escapeHtml(evt.name)}</strong>
@@ -1972,6 +1993,7 @@ const app = {
         // 全ての編集パネルを閉じる
         document.querySelectorAll('.card.dimmed').forEach(c => c.classList.remove('dimmed'));
         document.querySelectorAll('.edit-panel.open').forEach(p => p.classList.remove('open'));
+        document.querySelectorAll('.card.expanded').forEach(c => c.classList.remove('expanded'));
         
         if (isOpen) return;
         
@@ -1986,7 +2008,14 @@ const app = {
         if (datesInput) datesInput.value = evt.candidates.join('\n');
         if (statusSelect) statusSelect.value = evt.status;
         
+        const card = panel.parentElement;
+        card.classList.add('expanded');
         panel.classList.add('open');
+        // コントロール切替: 非表示->編集用表示
+        const ctrlDefault = card.querySelector('.controls-default');
+        const ctrlEdit = card.querySelector('.controls-edit');
+        if (ctrlDefault) ctrlDefault.style.display = 'none';
+        if (ctrlEdit) ctrlEdit.style.display = 'flex';
         
         // 他のカードを暗くする
         document.querySelectorAll('.card').forEach(card => {
@@ -2025,15 +2054,15 @@ const app = {
         
         document.getElementById('editEvtName').value = evt.name;
         document.getElementById('editEvtDates').value = evt.candidates.join('\n');
+        document.getElementById('editEvtShopInfo').value = evt.shopInfo || '';
         document.getElementById('editEvtStatus').value = evt.status;
     },
 
     saveEditEvent: async () => {
         const name = document.getElementById('editEvtName').value.trim();
         const datesText = document.getElementById('editEvtDates').value.trim();
+        const shopInfo = document.getElementById('editEvtShopInfo').value.trim();
         const status = document.getElementById('editEvtStatus').value;
-        const location = document.getElementById('editEvtLocation').value.trim();
-        const url = document.getElementById('editEvtUrl').value.trim();
         
         if (!name || !datesText) {
             return app.showToast("入力項目が不足しています", 'error');
@@ -2051,9 +2080,8 @@ const app = {
         if (memoryEvt) {
             memoryEvt.name = name;
             memoryEvt.candidates = candidates;
+            memoryEvt.shopInfo = shopInfo || null;
             memoryEvt.status = status;
-            memoryEvt.location = location || null;
-            memoryEvt.url = url || null;
         }
 
         await app.loadData();
@@ -2065,9 +2093,8 @@ const app = {
         
         targetEvt.name = name;
         targetEvt.candidates = candidates;
+        targetEvt.shopInfo = shopInfo || null;
         targetEvt.status = status;
-        targetEvt.location = location || null;
-        targetEvt.url = url || null;
         targetEvt.updatedAt = new Date().toISOString();
         
         if (await app.saveData()) {
@@ -2084,9 +2111,8 @@ const app = {
     saveEditEventInline: async (eventId, opts = { showDashboard: false }) => {
         const name = document.getElementById(`editName-${eventId}`).value.trim();
         const datesText = document.getElementById(`editDates-${eventId}`).value.trim();
+        const shopInfo = document.getElementById(`editShopInfo-${eventId}`).value.trim();
         const status = document.getElementById(`editStatus-${eventId}`).value;
-        const location = document.getElementById(`editLocation-${eventId}`)?.value?.trim() || '';
-        const url = document.getElementById(`editUrl-${eventId}`)?.value?.trim() || '';
         
         if (!name || !datesText) {
             return app.showToast("入力項目が不足しています", 'error');
@@ -2102,9 +2128,8 @@ const app = {
         if (memoryEvt) {
             memoryEvt.name = name;
             memoryEvt.candidates = candidates;
+            memoryEvt.shopInfo = shopInfo || null;
             memoryEvt.status = status;
-            memoryEvt.location = location || null;
-            memoryEvt.url = url || null;
         }
 
         await app.loadData();
@@ -2116,16 +2141,23 @@ const app = {
         
         targetEvt.name = name;
         targetEvt.candidates = candidates;
+        targetEvt.shopInfo = shopInfo || null;
         targetEvt.status = status;
-        targetEvt.location = location || null;
-        targetEvt.url = url || null;
         targetEvt.updatedAt = new Date().toISOString();
         
         if (await app.saveData()) {
             app.showToast("イベントを更新しました ✨");
             
             const panel = document.getElementById(`edit-panel-${eventId}`);
-            if (panel) panel.classList.remove('open');
+            if (panel) {
+                panel.classList.remove('open');
+                const card = panel.parentElement;
+                card.classList.remove('expanded');
+                const ctrlDefault = card.querySelector('.controls-default');
+                const ctrlEdit = card.querySelector('.controls-edit');
+                if (ctrlDefault) ctrlDefault.style.display = 'flex';
+                if (ctrlEdit) ctrlEdit.style.display = 'none';
+            }
             document.querySelectorAll('.card.dimmed').forEach(c => c.classList.remove('dimmed'));
             
             const activeView = document.querySelector('.view.active')?.id;
@@ -2143,7 +2175,15 @@ const app = {
 
     cancelEditInline: (eventId) => {
         const panel = document.getElementById(`edit-panel-${eventId}`);
-        if (panel) panel.classList.remove('open');
+        if (panel) {
+            panel.classList.remove('open');
+            const card = panel.parentElement;
+            card.classList.remove('expanded');
+            const ctrlDefault = card.querySelector('.controls-default');
+            const ctrlEdit = card.querySelector('.controls-edit');
+            if (ctrlDefault) ctrlDefault.style.display = 'flex';
+            if (ctrlEdit) ctrlEdit.style.display = 'none';
+        }
         document.querySelectorAll('.card.dimmed').forEach(c => c.classList.remove('dimmed'));
     },
 };
