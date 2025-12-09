@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Event Manager ✨</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Apple-inspired color palette */
+            --primary: #007AFF;
+            --primary-dark: #0056CC;
+            --primary-light: rgba(0, 122, 255, 0.1);
+            --secondary: #F5F5F7;
+            --accent-green: #34C759;
+            --accent-orange: #FF9500;
+            --accent-red: #FF3B30;
+            --accent-purple: #AF52DE;
+            --accent-pink: #FF2D55;
+            --accent-teal: #5AC8FA;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F5F5F7;
+            --bg-tertiary: #E8E8ED;
+            --text-primary: #1D1D1F;
+            --text-secondary: #86868B;
+            --text-tertiary: #AEAEB2;
+            --border: rgba(0, 0, 0, 0.08);
+            --border-focus: rgba(0, 122, 255, 0.4);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+            --shadow-glow: 0 0 40px rgba(0, 122, 255, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.72);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 24px;
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.08) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+            animation: bgFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes bgFloat {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.02); }
+        }
+
+        .container { 
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--glass-bg);
+            padding: 40px;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            position: relative;
+            z-index: 1;
+            animation: containerFloat 0.6s ease-out;
+        }
+
+        @keyframes containerFloat {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        h1, h2, h3 { 
+            margin-top: 0;
+            color: var(--text-primary);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        h2 { font-size: 1.75rem; }
+        h3 { font-size: 1.375rem; }
+
+        /* Enhanced Button Styles */
+        .btn { 
+            padding: 14px 28px;
+            border: none;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: white;
+            background: linear-gradient(135deg, var(--primary) 0%, #5856D6 100%);
+            transition: all var(--transition-smooth);
+            box-shadow: var(--shadow-sm), 0 4px 15px rgba(0, 122, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.01em;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before { left: 100%; }
+        
+        .btn:hover { 
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: var(--shadow-md), 0 8px 25px rgba(0, 122, 255, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .btn-outline { 
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover { 
+            background: var(--primary-light);
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.2);
+        }
+
+        .btn-danger { 
+            background: linear-gradient(135deg, var(--accent-red) 0%, #FF6B6B 100%);
+            box-shadow: var(--shadow-sm), 0 4px 15px rgba(255, 59, 48, 0.3);
+        }
+
+        .btn-danger:hover { 
+            box-shadow: var(--shadow-md), 0 8px 25px rgba(255, 59, 48, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #5ED681 100%);
+            box-shadow: var(--shadow-sm), 0 4px 15px rgba(52, 199, 89, 0.3);
+        }
+
+        .input-text { 
+            width: 100%;
+            padding: 16px 20px;
+            box-sizing: border-box;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: var(--bg-primary);
+            transition: all var(--transition-fast);
+            color: var(--text-primary);
+        }
+
+        .input-text:focus { 
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--border-focus);
+            background: white;
+        }
+
+        .input-text::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            letter-spacing: 0.01em;
+        }
+
+        /* Views */
+        .view { display: none; }
+        .view.active { display: block; animation: viewSlide 0.4s var(--transition-smooth); }
+
+        @keyframes viewSlide { 
+            from { opacity: 0; transform: translateX(20px); } 
+            to { opacity: 1; transform: translateX(0); } 
+        }
+
+        /* Card Styles - Apple-like */
+        .card { 
+            background: var(--bg-primary);
+            padding: 24px;
+            margin-bottom: 16px;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all var(--transition-smooth);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent-purple), var(--accent-pink));
+            transform: scaleX(0);
+            transition: transform var(--transition-smooth);
+            transform-origin: left;
+        }
+
+        .card:hover { 
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: var(--shadow-lg);
+            border-color: transparent;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        /* Status Badges - Pill style */
+        .status-badge { 
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.8); }
+        }
+
+        .status-open { 
+            background: rgba(52, 199, 89, 0.15);
+            color: var(--accent-green);
+        }
+        .status-open::before { background: var(--accent-green); }
+
+        .status-closed { 
+            background: rgba(255, 59, 48, 0.12);
+            color: var(--accent-red);
+        }
+        .status-closed::before { background: var(--accent-red); animation: none; }
+
+        .status-planning { 
+            background: rgba(255, 149, 0, 0.15);
+            color: var(--accent-orange);
+        }
+        .status-planning::before { background: var(--accent-orange); }
+
+        .status-decided { 
+            background: rgba(175, 82, 222, 0.15);
+            color: var(--accent-purple);
+        }
+        .status-decided::before { background: var(--accent-purple); animation: none; }
+
+        /* Edit panel animation */
+        .edit-panel { 
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            margin-top: 0;
+        }
+
+        .edit-panel.open { 
+            max-height: 500px;
+            opacity: 1;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .card.dimmed { 
+            opacity: 0.3;
+            pointer-events: none;
+            filter: blur(2px);
+        }
+
+        /* Toast Notifications - Floating style */
+        .toast-container { 
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast { 
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: var(--text-primary);
+            padding: 16px 24px;
+            border-radius: var(--radius-lg);
+            opacity: 0;
+            transform: translateX(120%) scale(0.9);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-lg);
+            max-width: 350px;
+            border: 1px solid var(--glass-border);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toast::before {
+            content: '✓';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--accent-green);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .toast.show { 
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+
+        /* Loading Spinner - Modern */
+        .loading-overlay { 
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .loading-overlay.show { display: flex; }
+
+        .spinner { 
+            width: 56px;
+            height: 56px;
+            border: 4px solid var(--bg-tertiary);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        .loading-text {
+            color: var(--text-secondary);
+            font-weight: 500;
+            animation: loadingPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Table Styles - Clean & Modern */
+        .table-container { 
+            overflow-x: auto;
+            margin-top: 20px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        table { 
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 600px;
+            background: var(--bg-primary);
+        }
+
+        th, td { 
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th { 
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover td {
+            background: var(--bg-secondary);
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        /* Seat Number - Fun Animation */
+        .seat-number { 
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: seatBounce 0.6s var(--transition-bounce);
+        }
+
+        @keyframes seatBounce {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Header - Glassmorphism */
+        header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header strong {
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .user-info { 
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-teal), var(--primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* Lottery Draw Button - Extra Fun */
+        .btn-lottery {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 50%, #FFD93D 100%);
+            font-size: 1.3rem;
+            padding: 20px 40px;
+            animation: lotteryPulse 2s ease-in-out infinite;
+            box-shadow: 0 8px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        @keyframes lotteryPulse {
+            0%, 100% { box-shadow: 0 8px 30px rgba(255, 107, 107, 0.4); }
+            50% { box-shadow: 0 12px 40px rgba(255, 107, 107, 0.6), 0 0 60px rgba(255, 107, 107, 0.3); }
+        }
+
+        .btn-lottery:hover {
+            animation: none;
+            transform: translateY(-5px) scale(1.05);
+        }
+
+        /* Confetti effect area */
+        .celebration {
+            position: relative;
+        }
+
+        .celebration::after {
+            content: '🎉';
+            position: absolute;
+            font-size: 2rem;
+            animation: celebrateFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes celebrateFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(10deg); }
+        }
+
+        /* Details/Summary - Collapsible sections */
+        details {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-secondary);
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        summary::before {
+            content: '▶';
+            font-size: 0.7rem;
+            transition: transform var(--transition-fast);
+        }
+
+        details[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        details > div {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Radio & Checkbox - Custom */
+        input[type="radio"],
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            margin-right: 8px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+            vertical-align: middle;
+        }
+
+        input[type="checkbox"] {
+            border-radius: 6px;
+        }
+
+        input[type="radio"]:checked,
+        input[type="checkbox"]:checked {
+            border-color: var(--primary);
+            background: var(--primary);
+        }
+
+        input[type="radio"]:checked::after,
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        input[type="radio"]:hover,
+        input[type="checkbox"]:hover {
+            border-color: var(--primary);
+        }
+
+        /* Organizer Controls Panel */
+        .organizer-panel {
+            background: linear-gradient(135deg, rgba(175, 82, 222, 0.1) 0%, rgba(0, 122, 255, 0.1) 100%);
+            border: 2px dashed var(--accent-purple);
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            margin-top: 24px;
+        }
+
+        .organizer-panel strong {
+            color: var(--accent-purple);
+            font-size: 1.1rem;
+        }
+
+        /* Decision Banner */
+        .decision-banner {
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.15) 0%, rgba(90, 200, 250, 0.15) 100%);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 24px;
+            border: 1px solid rgba(52, 199, 89, 0.3);
+        }
+
+        .decision-banner h3 {
+            margin: 0;
+            color: var(--accent-green);
+        }
+
+        /* Links */
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        a:hover {
+            color: var(--primary-dark);
+        }
+
+        /* Scrollbar - Custom */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-tertiary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .container { 
+                padding: 24px;
+                border-radius: var(--radius-lg);
+            }
+            .btn { 
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+            h2 { font-size: 1.5rem; }
+            th, td { 
+                padding: 12px;
+                font-size: 0.85rem;
+            }
+            .card { padding: 16px; }
+            header { 
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .seat-number { font-size: 2.5rem; }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #1C1C1E;
+                --bg-secondary: #2C2C2E;
+                --bg-tertiary: #3A3A3C;
+                --text-primary: #F5F5F7;
+                --text-secondary: #A1A1A6;
+                --text-tertiary: #636366;
+                --border: rgba(255, 255, 255, 0.1);
+                --glass-bg: rgba(28, 28, 30, 0.8);
+                --glass-border: rgba(255, 255, 255, 0.1);
+            }
+            
+            body {
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header id="appHeader" style="display:none;">
+        <div><strong>✨ 第三開発部のイベント</strong></div>
+        <div class="user-info">
+            <div class="user-avatar" id="userAvatar">U</div>
+            <span id="displayUserName">User</span> さん
+            <button class="btn btn-outline" style="padding:8px 16px; font-size:0.85rem;" onclick="app.logout()">ログアウト</button>
+        </div>
+    </header>
+
+    <div id="viewLogin" class="view active">
+        <div style="text-align:center; margin-bottom:32px;">
+            <div style="font-size:4rem; margin-bottom:16px;">🎉</div>
+            <h2 style="margin-bottom:8px;">Team Event Manager</h2>
+            <p style="color:var(--text-secondary); margin:0;">みんなで楽しいイベントを計画しよう！</p>
+        </div>
+        <div style="max-width:400px; margin:0 auto;">
+            <label>社員番号</label>
+            <p style="font-size:0.85rem; color:var(--text-tertiary); margin-top:0;">J社員番号をJなしで入力してください</p>
+            <input type="text" id="loginNo" class="input-text" placeholder="12345" autocomplete="off">
+            <button class="btn" style="width:100%; margin-top:8px;" onclick="app.login()">ログイン →</button>
+        </div>
+        <details>
+            <summary>👤 管理者メニュー（ユーザー登録）</summary>
+            <div>
+                <label>名前</label>
+                <input type="text" id="regName" class="input-text" placeholder="例: 山田 太郎">
+                <label>社員番号</label>
+                <input type="text" id="regNo" class="input-text" placeholder="例: 12345">
+                <button class="btn btn-outline" style="width:100%;" onclick="app.registerUser()">ユーザーを登録</button>
+            </div>
+        </details>
+    </div>
+
+    <div id="viewDashboard" class="view">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <h3 style="margin:0;">📋 イベント一覧</h3>
+            <div style="display:flex; gap:12px;">
+                <button class="btn btn-outline" onclick="app.showUserManagement()">👥 ユーザー管理</button>
+                <button class="btn" onclick="app.showCreateEvent()">＋ 新規イベント</button>
+            </div>
+        </div>
+        <div id="eventList" style="margin-top:20px;"></div>
+        <div id="emptyState" style="display:none; text-align:center; padding:60px 20px;">
+            <div style="font-size:4rem; margin-bottom:16px;">📭</div>
+            <h3 style="color:var(--text-secondary); margin-bottom:8px;">まだイベントがありません</h3>
+            <p style="color:var(--text-tertiary);">「新規イベント」ボタンから最初のイベントを作成しましょう！</p>
+        </div>
+    </div>
+
+    <div id="viewCreate" class="view">
+        <button class="btn btn-outline" onclick="app.router('viewDashboard')" style="margin-bottom:24px;">← 一覧に戻る</button>
+        <h3 style="margin-bottom:24px;">🎊 新規イベント作成</h3>
+        <label>イベント名</label>
+        <input type="text" id="newEvtName" class="input-text" placeholder="例：12月度 懇親会 🍻">
+        <label>候補日（カンマ区切り、または複数行）</label>
+        <textarea id="newEvtDates" class="input-text" rows="4" placeholder="2025/12/10&#13;2025/12/15&#13;2025/12/20"></textarea>
+        <p style="font-size:0.85rem; color:var(--text-tertiary); margin-top:-8px;">YYYY/MM/DD または YYYY-MM-DD 形式で入力してください</p>
+        <div style="margin-top:20px; display:flex; gap:12px;">
+            <button class="btn btn-success" onclick="app.createEvent()">🚀 作成して公開</button>
+            <button class="btn btn-outline" onclick="app.router('viewDashboard')">キャンセル</button>
+        </div>
+    </div>
+
+    <div id="viewDetail" class="view">
+        <button class="btn btn-outline" onclick="app.router('viewDashboard')" style="margin-bottom:24px;">← 一覧に戻る</button>
+        <h2 id="detailTitle" style="margin:16px 0;">イベント名</h2>
+        <div id="detailMeta" style="margin-bottom:20px; font-size:0.95rem; color:var(--text-secondary);"></div>
+
+        <div id="areaVoting">
+            <div style="background: linear-gradient(135deg, rgba(0, 122, 255, 0.08) 0%, rgba(90, 200, 250, 0.08) 100%); padding:24px; border-radius:var(--radius-lg); margin-bottom:24px;">
+                <h4 style="margin:0 0 8px 0;">📅 日程調整</h4>
+                <p style="color:var(--text-secondary); margin:0; font-size:0.9rem;">参加可能な日程にチェックを入れてください</p>
+            </div>
+            <button class="btn btn-success" style="margin-top:16px;" onclick="app.submitVote()">💾 回答を保存</button>
+            <div id="voteList"></div>
+            
+            <div id="organizerControls" class="organizer-panel" style="display:none;">
+                <strong>👑 幹事メニュー</strong>
+                <p style="margin:12px 0; color:var(--text-secondary);">全員の回答が揃ったら、開催日を決定して締め切ってください。</p>
+                <select id="selectFixDate" class="input-text"></select>
+                <button class="btn" onclick="app.fixEventDate()">🎯 この日で決定し、座席抽選へ</button>
+            </div>
+        </div>
+
+        <div id="areaLottery" style="display:none;">
+            <div class="decision-banner celebration">
+                <div style="font-size:3rem; margin-bottom:12px;">🎊</div>
+                <h3>開催決定！</h3>
+                <p style="margin:8px 0 0 0;">開催日: <strong id="fixedDateDisplay" style="font-size:1.3rem; color:var(--primary);"></strong></p>
+            </div>
+
+            <div id="myLotteryArea" style="text-align:center; padding:32px; background:var(--bg-secondary); border-radius:var(--radius-lg); margin-bottom:24px;">
+                <p style="margin:0 0 16px 0; color:var(--text-secondary);">参加者は座席番号を引いてください</p>
+                <div id="mySeatResult" class="seat-number" style="margin:16px 0;">-</div>
+                <button id="btnDrawSeat" class="btn btn-lottery" onclick="app.drawSeat()">🎫 座席番号を引く</button>
+            </div>
+
+            <h4>👥 参加者座席リスト</h4>
+            <ul id="lotteryResultList" style="list-style:none; padding:0;"></ul>
+            <div id="closeEventArea"></div>
+        </div>
+    </div>
+
+    <div id="viewUserManagement" class="view">
+        <button class="btn btn-outline" onclick="app.showDashboard()" style="margin-bottom:24px;">← 一覧に戻る</button>
+        <h3>👥 ユーザー管理</h3>
+        <div id="userList" style="margin-top:20px;"></div>
+    </div>
+
+    <div id="viewEventManagement" class="view">
+        <button class="btn btn-outline" onclick="app.showDashboard()" style="margin-bottom:24px;">← 一覧に戻る</button>
+        <h3>⚙️ イベント管理</h3>
+        <div id="eventManagementList" style="margin-top:20px;"></div>
+    </div>
+
+    <div id="viewEditEvent" class="view">
+        <button class="btn btn-outline" onclick="app.router('viewEventManagement')" style="margin-bottom:24px;">← 管理に戻る</button>
+        <h3>✏️ イベント編集</h3>
+        <label>イベント名</label>
+        <input type="text" id="editEvtName" class="input-text">
+        <label>候補日（カンマ区切り、または複数行）</label>
+        <textarea id="editEvtDates" class="input-text" rows="4"></textarea>
+        <label>ステータス</label>
+        <select id="editEvtStatus" class="input-text">
+            <option value="PLANNING">企画中</option>
+            <option value="OPEN">募集中</option>
+            <option value="LOTTERY">座席抽選中</option>
+            <option value="CLOSED">決定済</option>
+        </select>
+        <div style="margin-top:20px; display:flex; gap:12px;">
+            <button class="btn" onclick="app.saveEditEvent()">💾 保存</button>
+            <button class="btn btn-outline" onclick="app.router('viewEventManagement')">キャンセル</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">読み込み中...</div>
+</div>
+
+<script>
+// ==========================================
+// ▼ 設定エリア (JSONBin)
+// ==========================================
+const BIN_ID = '6937803443b1c97be9e0d92c'; 
+const API_KEY = '$2a$10$Cv/cJjkOpi0ZRRNiXUil7esnjrImhKI06bRDPwygyz3MM.oXYecaC';
+// ==========================================
+
+const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+// ==========================================
+// ▼ ユーティリティ関数
+// ==========================================
+const utils = {
+    // XSS対策：HTMLエスケープ
+    escapeHtml: (str) => {
+        if (str == null) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    },
+    
+    // 日付バリデーション
+    isValidDate: (dateStr) => {
+        return /^\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}$/.test(dateStr);
+    },
+    
+    // 社員番号バリデーション（数字のみ）
+    isValidSyainNumber: (num) => {
+        return /^\d+$/.test(num);
+    },
+    
+    // デバウンス関数
+    debounce: (func, wait) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    },
+    
+    // ユーザー名のイニシャルを取得
+    getInitials: (name) => {
+        if (!name) return 'U';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length >= 2) {
+            return parts[0][0] + parts[parts.length - 1][0];
+        }
+        return name[0].toUpperCase();
+    }
+};
+
+const app = {
+    data: { users: [], events: [], version: 0 },
+    currentUser: null,
+    currentEvent: null,
+    isInitialized: false,
+
+    showToast: (message, type = 'success', timeout = 2500) => {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.innerHTML = utils.escapeHtml(message);
+        if (type === 'error') {
+            t.style.setProperty('--toast-icon', '"✕"');
+            t.style.background = 'rgba(255, 59, 48, 0.95)';
+            t.style.color = 'white';
+        }
+        container.appendChild(t);
+        // force reflow
+        void t.offsetWidth;
+        t.classList.add('show');
+        setTimeout(() => {
+            t.classList.remove('show');
+            setTimeout(() => {
+                if (container.contains(t)) container.removeChild(t);
+            }, 400);
+        }, timeout);
+    },
+
+    showLoading: (show = true) => {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            if (show) overlay.classList.add('show');
+            else overlay.classList.remove('show');
+        }
+    },
+
+    // --- 初期化 & データ取得 ---
+    init: async () => {
+        if (app.isInitialized) return;
+        app.isInitialized = true;
+        
+        await app.loadData();
+        app.showView('viewLogin');
+        
+        // イベントリスナーを一度だけ登録
+        const loginNo = document.getElementById('loginNo');
+        if (loginNo) {
+            loginNo.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') app.login();
+            });
+        }
+        
+        // Escキーで編集パネルを閉じる
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const openPanel = document.querySelector('.edit-panel.open');
+                if (openPanel) {
+                    openPanel.classList.remove('open');
+                    document.querySelectorAll('.card.dimmed').forEach(c => c.classList.remove('dimmed'));
+                }
+            }
+        });
+    },
+
+    loadData: async () => {
+        try {
+            app.showLoading(true);
+            const res = await fetch(BASE_URL + '/latest', { 
+                headers: { 'X-Master-Key': API_KEY },
+                cache: 'no-store'
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            const json = await res.json();
+            app.data = json.record;
+            if (!app.data.version) app.data.version = 0;
+            if (!app.data.users) app.data.users = [];
+            if (!app.data.events) app.data.events = [];
+            
+            // 互換性: 古いデータ構造を新しい形式に変換
+            app.data.events.forEach(evt => {
+                if (evt.responses) {
+                    Object.values(evt.responses).forEach(res => {
+                        if (res.dates) {
+                            res.available = res.dates;
+                            res.unavailable = [];
+                            res.comments = {};
+                            delete res.dates;
+                        }
+                    });
+                }
+            });
+            return true;
+        } catch (e) {
+            console.error('Load Error:', e);
+            app.showToast("データの読み込みに失敗しました", 'error');
+            return false;
+        } finally {
+            app.showLoading(false);
+        }
+    },
+
+    saveData: async () => {
+        try {
+            app.showLoading(true);
+            // 最新データを取得してバージョン競合チェック
+            const res = await fetch(BASE_URL + '/latest', { 
+                headers: { 'X-Master-Key': API_KEY },
+                cache: 'no-store'
+            });
+            if (!res.ok) throw new Error("Load Error for version check");
+            const json = await res.json();
+            const currentVersion = json.record.version || 0;
+            
+            if (currentVersion !== app.data.version) {
+                // 競合: 詳細マージ
+                const latestData = json.record;
+                app.data = app.mergeData(latestData, app.data);
+                app.data.version = currentVersion + 1;
+            } else {
+                // 正常: バージョンをインクリメント
+                app.data.version = (app.data.version || 0) + 1;
+            }
+            
+            const saveRes = await fetch(BASE_URL, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                body: JSON.stringify(app.data)
+            });
+            if (!saveRes.ok) throw new Error(`HTTP ${saveRes.status}: ${saveRes.statusText}`);
+            return true;
+        } catch (e) {
+            console.error('Save Error:', e);
+            app.showToast("保存に失敗しました: " + e.message, 'error');
+            return false;
+        } finally {
+            app.showLoading(false);
+        }
+    },
+
+    mergeData: (latest, mine) => {
+        const merged = { ...latest };
+        // users: 両方のリストをユニークにマージ
+        const allUsers = [...latest.users, ...mine.users];
+        const uniqueUsers = allUsers.filter((user, index, self) =>
+            index === self.findIndex(u => u.syainNumber === user.syainNumber)
+        );
+        merged.users = uniqueUsers;
+        // events: IDでマージ、自分の変更を優先
+        const eventMap = new Map();
+        latest.events.forEach(e => eventMap.set(e.id, e));
+        mine.events.forEach(e => {
+            if (eventMap.has(e.id)) {
+                const existing = eventMap.get(e.id);
+                eventMap.set(e.id, { ...existing, ...e });
+            } else {
+                eventMap.set(e.id, e);
+            }
+        });
+        merged.events = Array.from(eventMap.values());
+        merged.version = mine.version;
+        return merged;
+    },
+
+    // --- 認証・ユーザー管理 ---
+    registerUser: async () => {
+        const name = document.getElementById('regName').value.trim();
+        const syainNumber = document.getElementById('regNo').value.trim();
+        
+        if(!name || !syainNumber) {
+            return app.showToast("名前と社員番号を入力してください", 'error');
+        }
+        
+        if (!utils.isValidSyainNumber(syainNumber)) {
+            return app.showToast("社員番号は数字のみで入力してください", 'error');
+        }
+
+        // 重複チェック
+        if(app.data.users.find(u => u.syainNumber === syainNumber)) {
+            return app.showToast("この社員番号は登録済みです", 'error');
+        }
+
+        await app.loadData();
+        app.data.users.push({ name, syainNumber });
+        if (await app.saveData()) {
+            app.showToast("登録しました！ログインしてください 🎉");
+            document.getElementById('regName').value = "";
+            document.getElementById('regNo').value = "";
+        }
+    },
+
+    login: async () => {
+        const syainNumber = document.getElementById('loginNo').value.trim();
+        if(!syainNumber) {
+            return app.showToast("社員番号を入力してください", 'error');
+        }
+        
+        if (!utils.isValidSyainNumber(syainNumber)) {
+            return app.showToast("社員番号は数字のみで入力してください", 'error');
+        }
+
+        await app.loadData();
+        const user = app.data.users.find(u => u.syainNumber === syainNumber);
+        
+        if (user) {
+            app.currentUser = user;
+            document.getElementById('displayUserName').textContent = utils.escapeHtml(user.name);
+            document.getElementById('userAvatar').textContent = utils.getInitials(user.name);
+            document.getElementById('appHeader').style.display = 'flex';
+            app.router('viewDashboard');
+            app.renderDashboard();
+            app.showToast(`おかえりなさい、${user.name}さん！ 👋`);
+        } else {
+            app.showToast("ユーザーが見つかりません。管理者メニューから登録してください。", 'error');
+        }
+    },
+
+    logout: () => {
+        app.currentUser = null;
+        document.getElementById('appHeader').style.display = 'none';
+        document.getElementById('loginNo').value = '';
+        app.router('viewLogin');
+        app.showToast("ログアウトしました 👋");
+    },
+
+    showDashboard: () => {
+        app.router('viewDashboard');
+        app.renderDashboard();
+    },
+
+    // --- イベント作成 ---
+    showCreateEvent: () => {
+        document.getElementById('newEvtName').value = "";
+        document.getElementById('newEvtDates').value = "";
+        app.router('viewCreate');
+    },
+
+    createEvent: async () => {
+        const name = document.getElementById('newEvtName').value.trim();
+        const datesText = document.getElementById('newEvtDates').value.trim();
+        
+        if(!name || !datesText) {
+            return app.showToast("入力項目が不足しています", 'error');
+        }
+
+        const candidates = datesText.split(/\n|,/).map(d => d.trim()).filter(d => d);
+        
+        // 日付バリデーション
+        const invalidDates = candidates.filter(d => !utils.isValidDate(d));
+        if (invalidDates.length > 0) {
+            return app.showToast(`無効な日付形式: ${invalidDates[0]}`, 'error');
+        }
+        
+        const newEvent = {
+            id: Date.now().toString(),
+            name: name,
+            organizerNo: app.currentUser.syainNumber,
+            candidates: candidates,
+            status: 'PLANNING',
+            fixedDate: null,
+            responses: {},
+            attendees: [],
+            createdAt: new Date().toISOString()
+        };
+
+        await app.loadData();
+        app.data.events.push(newEvent);
+        if (await app.saveData()) {
+            app.showToast("イベントを作成しました 🎊");
+            app.router('viewDashboard');
+            app.renderDashboard();
+        }
+    },
+
+    // --- ダッシュボード表示 ---
+    renderDashboard: () => {
+        const list = document.getElementById('eventList');
+        const emptyState = document.getElementById('emptyState');
+        list.innerHTML = '';
+        
+        if (app.data.events.length === 0) {
+            emptyState.style.display = 'block';
+            return;
+        }
+        emptyState.style.display = 'none';
+        
+        // 新しい順に表示
+        [...app.data.events].reverse().forEach(evt => {
+            const orgUser = app.data.users.find(u => u.syainNumber === evt.organizerNo);
+            const orgName = orgUser ? utils.escapeHtml(orgUser.name) : evt.organizerNo;
+            const statusMap = {
+                'PLANNING': { text: '企画中', class: 'status-planning', icon: '📝' },
+                'OPEN': { text: '募集中', class: 'status-open', icon: '📢' },
+                'LOTTERY': { text: '座席抽選中', class: 'status-open', icon: '🎲' },
+                'CLOSED': { text: '決定済', class: 'status-decided', icon: '✅' }
+            };
+            const statusInfo = statusMap[evt.status] || { text: evt.status, class: 'status-closed', icon: '📋' };
+
+            const div = document.createElement('div');
+            div.className = 'card';
+            
+            // 参加者数を計算
+            const responseCount = Object.keys(evt.responses || {}).length;
+            
+            // 幹事の場合のみ編集・削除ボタンを表示
+            let controlsHtml = '';
+            if (app.currentUser && app.currentUser.syainNumber === evt.organizerNo) {
+                controlsHtml = `
+                    <div style="margin-top:12px; display:flex; gap:10px;">
+                        <button class="btn btn-outline" style="padding:8px 16px; font-size:0.85rem;" onclick="event.stopPropagation(); app.editEvent('${evt.id}')">✏️ 編集</button>
+                        <button class="btn btn-danger" style="padding:8px 16px; font-size:0.85rem;" onclick="event.stopPropagation(); app.deleteEvent('${evt.id}')">🗑️ 削除</button>
+                    </div>
+                `;
+            }
+
+            div.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <strong style="font-size:1.1rem;">${statusInfo.icon} ${utils.escapeHtml(evt.name)}</strong>
+                        <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:6px;">
+                            👑 幹事：${orgName} &nbsp;|&nbsp; 📅 候補日 ${evt.candidates.length}件 &nbsp;|&nbsp; 👥 回答 ${responseCount}件
+                        </div>
+                    </div>
+                    <span class="status-badge ${statusInfo.class}">${statusInfo.text}</span>
+                </div>
+                ${controlsHtml}
+                <div class="edit-panel" id="edit-panel-${evt.id}" onclick="event.stopPropagation();">
+                    <label>イベント名</label>
+                    <input type="text" id="editName-${evt.id}" class="input-text" value="${utils.escapeHtml(evt.name)}">
+                    <label>候補日（改行またはカンマ）</label>
+                    <textarea id="editDates-${evt.id}" class="input-text" rows="3">${evt.candidates.map(d => utils.escapeHtml(d)).join('\n')}</textarea>
+                    <label>ステータス</label>
+                    <select id="editStatus-${evt.id}" class="input-text">
+                        <option value="PLANNING" ${evt.status === 'PLANNING' ? 'selected' : ''}>📝 企画中</option>
+                        <option value="OPEN" ${evt.status === 'OPEN' ? 'selected' : ''}>📢 募集中</option>
+                        <option value="LOTTERY" ${evt.status === 'LOTTERY' ? 'selected' : ''}>🎲 座席抽選中</option>
+                        <option value="CLOSED" ${evt.status === 'CLOSED' ? 'selected' : ''}>✅ 決定済</option>
+                    </select>
+                    <div style="margin-top:12px; display:flex; gap:10px;">
+                        <button class="btn" onclick="event.stopPropagation(); app.saveEditEventInline('${evt.id}', { showDashboard:false })">💾 保存</button>
+                        <button class="btn btn-outline" onclick="event.stopPropagation(); app.cancelEditInline('${evt.id}')">キャンセル</button>
+                    </div>
+                </div>
+            `;
+            
+            const eventId = evt.id;
+            div.addEventListener('click', (e) => {
+                // 編集パネルが開いていれば閉じる
+                const openPanel = document.querySelector('.edit-panel.open');
+                if (openPanel) {
+                    openPanel.classList.remove('open');
+                    document.querySelectorAll('.card.dimmed').forEach(c => c.classList.remove('dimmed'));
+                    return;
+                }
+                // 最新データからイベントを取得
+                const currentEvt = app.data.events.find(e => e.id === eventId);
+                if (!currentEvt || currentEvt.status === 'PLANNING') return;
+                app.openEventDetail(eventId);
+            });
+            list.appendChild(div);
+        });
+    },
+
+    // --- イベント詳細 ---
+    openEventDetail: async (eventId) => {
+        await app.loadData();
+        const evt = app.data.events.find(e => e.id === eventId);
+        if(!evt) {
+            app.showToast("イベントが見つかりません", 'error');
+            return;
+        }
+        
+        app.currentEvent = evt;
+
+        const orgUser = app.data.users.find(u => u.syainNumber === evt.organizerNo);
+        const orgName = orgUser ? utils.escapeHtml(orgUser.name) : evt.organizerNo;
+        document.getElementById('detailTitle').textContent = evt.name;
+        document.getElementById('detailMeta').innerHTML = `👑 幹事: ${orgName}`;
+        
+        // DOM要素をリセット
+        document.getElementById('voteList').innerHTML = '';
+        document.getElementById('lotteryResultList').innerHTML = '';
+        document.getElementById('closeEventArea').innerHTML = '';
+        document.getElementById('fixedDateDisplay').textContent = '';
+        
+        // myLotteryAreaをデフォルト状態にリセット
+        document.getElementById('myLotteryArea').innerHTML = `
+            <p style="margin:0 0 16px 0; color:var(--text-secondary);">参加者は座席番号を引いてください</p>
+            <div id="mySeatResult" class="seat-number" style="margin:16px 0;">-</div>
+            <button id="btnDrawSeat" class="btn btn-lottery" onclick="app.drawSeat()">🎫 座席番号を引く</button>
+        `;
+
+        // 状態による出し分け
+        if (evt.status === 'OPEN') {
+            document.getElementById('areaVoting').style.display = 'block';
+            document.getElementById('areaLottery').style.display = 'none';
+            app.renderVotingArea(evt);
+        } else if (evt.status === 'LOTTERY') {
+            document.getElementById('areaVoting').style.display = 'none';
+            document.getElementById('areaLottery').style.display = 'block';
+            app.renderLotteryArea(evt);
+        } else if (evt.status === 'CLOSED') {
+            document.getElementById('areaVoting').style.display = 'none';
+            document.getElementById('areaLottery').style.display = 'block';
+            app.renderClosedEventHistory(evt);
+        } else {
+            document.getElementById('areaVoting').style.display = 'none';
+            document.getElementById('areaLottery').style.display = 'none';
+        }
+
+        app.router('viewDetail');
+    },
+
+    // --- フェーズ1: 投票エリア ---
+    renderVotingArea: (evt) => {
+        if (!evt) evt = app.currentEvent;
+        const container = document.getElementById('voteList');
+        container.innerHTML = '';
+
+        const myRes = evt.responses[app.currentUser.syainNumber] || { available: [], unavailable: [], comments: {} };
+
+        let html = `<div class="table-container"><table><thead><tr><th>候補日</th><th>参加</th><th>不参加</th><th>コメント</th><th>回答数</th></tr></thead><tbody>`;
+        
+        evt.candidates.forEach(date => {
+            const escapedDate = utils.escapeHtml(date);
+            const isAvailable = myRes.available.includes(date);
+            const isUnavailable = myRes.unavailable.includes(date);
+            const comment = myRes.comments[date] || '';
+            const count = Object.values(evt.responses).filter(r => (r.available || []).includes(date)).length;
+            
+            html += `
+                <tr>
+                    <td><strong>${escapedDate}</strong></td>
+                    <td><label style="cursor:pointer;"><input type="radio" name="vote-${escapedDate}" value="available" ${isAvailable ? 'checked' : ''}> ⭕ 参加</label></td>
+                    <td><label style="cursor:pointer;"><input type="radio" name="vote-${escapedDate}" value="unavailable" ${isUnavailable ? 'checked' : ''}> ❌ 不参加</label></td>
+                    <td><input type="text" value="${utils.escapeHtml(comment)}" id="comment-${escapedDate}" class="input-text" style="width:180px; margin:0;"></td>
+                    <td style="text-align:center;"><span style="font-weight:600; color:var(--primary);">${count}</span> 名</td>
+                </tr>
+            `;
+        });
+        html += `</tbody></table></div>`;
+
+        // 回答状況の詳細テーブル
+        html += '<h4 style="margin-top:32px;">📊 回答状況詳細</h4>';
+        html += '<div class="table-container"><table><thead><tr><th>ユーザー</th>';
+        evt.candidates.forEach(date => {
+            html += `<th>${utils.escapeHtml(date)}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+        
+        app.data.users.forEach(user => {
+            const res = evt.responses[user.syainNumber];
+            const userName = utils.escapeHtml(user.name);
+            html += `<tr><td><strong>${userName}</strong></td>`;
+            evt.candidates.forEach(date => {
+                if (!res) {
+                    html += '<td style="color:var(--text-tertiary);">未回答</td>';
+                } else {
+                    const isAvailable = (res.available || []).includes(date);
+                    const isUnavailable = (res.unavailable || []).includes(date);
+                    const comment = res.comments ? res.comments[date] || '' : '';
+                    let status = '';
+                    if (isAvailable) status = '<span style="color:var(--accent-green);">⭕ 参加</span>';
+                    else if (isUnavailable) status = '<span style="color:var(--accent-red);">❌ 不参加</span>';
+                    else status = '<span style="color:var(--text-tertiary);">-</span>';
+                    html += `<td>${status}${comment ? '<br><small style="color:var(--text-secondary);">' + utils.escapeHtml(comment) + '</small>' : ''}</td>`;
+                }
+            });
+            html += '</tr>';
+        });
+        
+        // 参加者数行
+        html += '<tr style="background:var(--bg-secondary);"><td><strong>👥 参加者数</strong></td>';
+        evt.candidates.forEach(date => {
+            const count = Object.values(evt.responses).filter(r => (r.available || []).includes(date)).length;
+            html += `<td style="text-align:center;"><strong style="color:var(--primary); font-size:1.1rem;">${count}</strong></td>`;
+        });
+        html += '</tr></tbody></table></div>';
+
+        container.innerHTML = html;
+
+        // 幹事専用コントロール
+        const orgControls = document.getElementById('organizerControls');
+        const select = document.getElementById('selectFixDate');
+        
+        if (app.currentUser.syainNumber === evt.organizerNo) {
+            orgControls.style.display = 'block';
+            select.innerHTML = '<option value="">📅 開催日を選択...</option>';
+            evt.candidates.forEach(d => {
+                const count = Object.values(evt.responses).filter(r => (r.available || []).includes(d)).length;
+                select.innerHTML += `<option value="${utils.escapeHtml(d)}">${utils.escapeHtml(d)} (${count}名参加可能)</option>`;
+            });
+        } else {
+            orgControls.style.display = 'none';
+        }
+    },
+
+    submitVote: async () => {
+        const evt = app.currentEvent;
+        if (!evt) return;
+        
+        const available = [];
+        const unavailable = [];
+        const comments = {};
+
+        evt.candidates.forEach(date => {
+            const escapedDate = utils.escapeHtml(date);
+            const vote = document.querySelector(`input[name="vote-${escapedDate}"]:checked`);
+            if (vote) {
+                if (vote.value === 'available') available.push(date);
+                else if (vote.value === 'unavailable') unavailable.push(date);
+            }
+            const commentEl = document.getElementById(`comment-${escapedDate}`);
+            if (commentEl) {
+                const comment = commentEl.value.trim();
+                if (comment) comments[date] = comment;
+            }
+        });
+
+        await app.loadData();
+        const targetEvt = app.data.events.find(e => e.id === app.currentEvent.id);
+        
+        if (!targetEvt) {
+            return app.showToast("イベントが見つかりません", 'error');
+        }
+        
+        if (!targetEvt.responses) targetEvt.responses = {};
+        
+        targetEvt.responses[app.currentUser.syainNumber] = {
+            available: available,
+            unavailable: unavailable,
+            comments: comments,
+            seat: targetEvt.responses[app.currentUser.syainNumber]?.seat || null,
+            updatedAt: new Date().toISOString()
+        };
+
+        if (await app.saveData()) {
+            app.showToast("回答を保存しました ✨");
+            app.openEventDetail(targetEvt.id);
+        }
+    },
+
+    fixEventDate: async () => {
+        const date = document.getElementById('selectFixDate').value;
+        if(!date) {
+            return app.showToast("日付を選択してください", 'error');
+        }
+        
+        const confirmMsg = `開催日を「${date}」に決定しますか？\n決定するとアンケートは締め切られます。`;
+        if(!confirm(confirmMsg)) return;
+
+        await app.loadData();
+        const targetEvt = app.data.events.find(e => e.id === app.currentEvent.id);
+        
+        if (!targetEvt) {
+            return app.showToast("イベントが見つかりません", 'error');
+        }
+        
+        targetEvt.status = 'LOTTERY';
+        targetEvt.fixedDate = date;
+
+        // 参加者を確定（その日に参加可能と答えた人だけ）
+        const attendees = [];
+        Object.entries(targetEvt.responses).forEach(([syainNumber, res]) => {
+            if ((res.available || []).includes(date)) {
+                attendees.push({ syainNumber: syainNumber, seat: null });
+            }
+        });
+        targetEvt.attendees = attendees;
+
+        if (await app.saveData()) {
+            app.showToast("🎉 開催日を決定しました！座席抽選モードに移行します");
+            app.openEventDetail(targetEvt.id);
+            app.renderDashboard();
+        }
+    },
+
+    // --- フェーズ2: 抽選エリア ---
+    renderLotteryArea: (evt) => {
+        if (!evt) evt = app.currentEvent;
+        evt = app.data.events.find(e => e.id === evt.id) || evt;
+        
+        const fixedDateDisplay = document.getElementById('fixedDateDisplay');
+        if (!fixedDateDisplay) return;
+        
+        fixedDateDisplay.textContent = evt.fixedDate;
+
+        // 自分が参加者リストにいるか
+        const me = evt.attendees.find(a => a.syainNumber === app.currentUser.syainNumber);
+        const myLotteryArea = document.getElementById('myLotteryArea');
+
+        if (!myLotteryArea) return;
+
+        if (!me) {
+            myLotteryArea.innerHTML = `
+                <p style="color:var(--accent-red); font-weight:500;">😢 このイベントには参加できません</p>
+                <p style="color:var(--text-secondary); font-size:0.9rem;">選択された開催日に参加可能と回答していませんでした</p>
+            `;
+        } else if (me.seat) {
+            myLotteryArea.innerHTML = `
+                <p style="color:var(--accent-green); font-weight:500;">🎊 あなたの座席が決まりました！</p>
+                <div class="seat-number" style="margin:16px 0;">No. ${me.seat}</div>
+            `;
+        } else {
+            myLotteryArea.innerHTML = `
+                <p style="margin:0 0 16px 0; color:var(--text-secondary);">🎰 あなたの座席番号を引いてください</p>
+                <div class="seat-number" style="margin:16px 0; color:var(--text-tertiary);">?</div>
+                <button class="btn btn-lottery" onclick="app.drawSeat()">🎫 座席番号を引く</button>
+            `;
+        }
+
+        // 全員のリスト表示
+        const ul = document.getElementById('lotteryResultList');
+        if (!ul) return;
+        
+        ul.innerHTML = '';
+        evt.attendees.forEach(att => {
+            const user = app.data.users.find(u => u.syainNumber === att.syainNumber);
+            const uName = user ? utils.escapeHtml(user.name) : att.syainNumber;
+            const li = document.createElement('li');
+            li.style.cssText = 'padding:12px 16px; background:var(--bg-secondary); border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;';
+            
+            if (att.seat) {
+                li.innerHTML = `<span>${uName}</span><span class="seat-number" style="font-size:1.5rem;">No. ${att.seat}</span>`;
+            } else {
+                li.innerHTML = `<span>${uName}</span><span style="color:var(--text-tertiary);">⏳ 抽選待ち</span>`;
+            }
+            ul.appendChild(li);
+        });
+
+        // 全員抽選終了したら決定済ボタン
+        const allDrawn = evt.attendees.every(a => a.seat !== null);
+        const closeArea = document.getElementById('closeEventArea');
+        if (!closeArea) return;
+        
+        let closeHtml = '';
+        if (allDrawn && evt.status !== 'CLOSED' && app.currentUser.syainNumber === evt.organizerNo) {
+            closeHtml = `
+                <div style="text-align:center; margin-top:24px;">
+                    <button class="btn btn-success" style="font-size:1.1rem; padding:16px 32px;" onclick="app.closeEvent()">
+                        ✅ 全員の抽選完了！イベントを決定済にする
+                    </button>
+                </div>
+            `;
+        }
+
+        // 参加/不参加回答履歴
+        closeHtml += '<h4 style="margin-top:32px;">📊 参加/不参加回答履歴</h4>';
+        closeHtml += app.buildResponseHistoryTable(evt);
+        closeArea.innerHTML = closeHtml;
+    },
+
+    // 回答履歴テーブル生成（共通化）
+    buildResponseHistoryTable: (evt) => {
+        let html = '<div class="table-container"><table><thead><tr><th>ユーザー</th>';
+        evt.candidates.forEach(date => {
+            const isFinal = date === evt.fixedDate;
+            html += `<th style="${isFinal ? 'background:rgba(52,199,89,0.1);' : ''}">${utils.escapeHtml(date)}${isFinal ? ' ⭐' : ''}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+
+        app.data.users.forEach(user => {
+            const res = evt.responses[user.syainNumber];
+            const userName = utils.escapeHtml(user.name);
+            html += `<tr><td><strong>${userName}</strong></td>`;
+            evt.candidates.forEach(date => {
+                const isFinal = date === evt.fixedDate;
+                const bgStyle = isFinal ? 'background:rgba(52,199,89,0.08);' : '';
+                
+                if (!res) {
+                    html += `<td style="${bgStyle}color:var(--text-tertiary);">未回答</td>`;
+                } else {
+                    const isAvailable = (res.available || []).includes(date);
+                    const isUnavailable = (res.unavailable || []).includes(date);
+                    const comment = res.comments ? res.comments[date] || '' : '';
+                    let status = '';
+                    if (isAvailable) {
+                        status = isFinal ? '<span style="color:var(--accent-green); font-weight:600;">✓ 参加</span>' : '<span style="color:var(--accent-green);">⭕ 参加</span>';
+                    } else if (isUnavailable) {
+                        status = '<span style="color:var(--accent-red);">❌ 不参加</span>';
+                    } else {
+                        status = '<span style="color:var(--text-tertiary);">-</span>';
+                    }
+                    html += `<td style="${bgStyle}">${status}${comment ? '<br><small style="color:var(--text-secondary);">' + utils.escapeHtml(comment) + '</small>' : ''}</td>`;
+                }
+            });
+            html += '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        return html;
+    },
+
+    drawSeat: async () => {
+        await app.loadData();
+        const targetEvt = app.data.events.find(e => e.id === app.currentEvent.id);
+        
+        if (!targetEvt) {
+            return app.showToast("イベントが見つかりません", 'error');
+        }
+        
+        const meIndex = targetEvt.attendees.findIndex(a => a.syainNumber === app.currentUser.syainNumber);
+        
+        if (meIndex === -1) {
+            return app.showToast("参加者リストに登録されていません", 'error');
+        }
+
+        if (targetEvt.attendees[meIndex].seat) {
+            app.showToast("既に座席を引いています");
+            app.openEventDetail(targetEvt.id);
+            return;
+        }
+
+        const total = targetEvt.attendees.length;
+        const usedSeats = targetEvt.attendees.map(a => a.seat).filter(s => s !== null);
+        const allSeats = Array.from({length: total}, (_, i) => i + 1);
+        const availableSeats = allSeats.filter(s => !usedSeats.includes(s));
+
+        if (availableSeats.length === 0) {
+            return app.showToast("空き座席がありません", 'error');
+        }
+
+        // ランダムに1つ選ぶ
+        const randomSeat = availableSeats[Math.floor(Math.random() * availableSeats.length)];
+        targetEvt.attendees[meIndex].seat = randomSeat;
+        
+        if (await app.saveData()) {
+            app.showToast(`🎊 あなたの座席は No.${randomSeat} です！`);
+            app.openEventDetail(targetEvt.id);
+            app.renderDashboard();
+        }
+    },
+
+    closeEvent: async () => {
+        if (!confirm('🎉 全員の抽選が終了しました！\nイベントを決定済にしますか？')) return;
+        
+        await app.loadData();
+        const targetEvt = app.data.events.find(e => e.id === app.currentEvent.id);
+        
+        if (!targetEvt) {
+            return app.showToast("イベントが見つかりません", 'error');
+        }
+        
+        targetEvt.status = 'CLOSED';
+        targetEvt.closedAt = new Date().toISOString();
+        
+        if (await app.saveData()) {
+            app.showToast('🎊 イベントを決定済にしました！お疲れ様でした！');
+            app.openEventDetail(targetEvt.id);
+            app.renderDashboard();
+        }
+    },
+
+    // --- フェーズ3: 決定済イベント履歴表示 ---
+    renderClosedEventHistory: (evt) => {
+        if (!evt) evt = app.currentEvent;
+        evt = app.data.events.find(e => e.id === evt.id) || evt;
+        
+        const fixedDateDisplay = document.getElementById('fixedDateDisplay');
+        if (!fixedDateDisplay) return;
+        
+        fixedDateDisplay.textContent = evt.fixedDate;
+
+        const me = evt.attendees.find(a => a.syainNumber === app.currentUser.syainNumber);
+        const myLotteryArea = document.getElementById('myLotteryArea');
+
+        if (!myLotteryArea) return;
+
+        if (!me) {
+            myLotteryArea.innerHTML = `
+                <p style="color:var(--accent-red);">😢 このイベントには参加しませんでした</p>
+            `;
+        } else {
+            myLotteryArea.innerHTML = `
+                <p style="color:var(--accent-green); font-weight:500;">✅ 参加しました！</p>
+                <div class="seat-number" style="margin:16px 0;">No. ${me.seat}</div>
+            `;
+        }
+
+        // 全参加者リスト
+        const ul = document.getElementById('lotteryResultList');
+        if (!ul) return;
+        
+        ul.innerHTML = '';
+        evt.attendees.forEach(att => {
+            const user = app.data.users.find(u => u.syainNumber === att.syainNumber);
+            const uName = user ? utils.escapeHtml(user.name) : att.syainNumber;
+            const li = document.createElement('li');
+            li.style.cssText = 'padding:12px 16px; background:var(--bg-secondary); border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;';
+            li.innerHTML = `<span>${uName}</span><span class="seat-number" style="font-size:1.5rem;">No. ${att.seat || '-'}</span>`;
+            ul.appendChild(li);
+        });
+
+        const closeArea = document.getElementById('closeEventArea');
+        if (!closeArea) return;
+        
+        let historyHtml = '<h4 style="margin-top:32px;">📊 参加/不参加回答履歴</h4>';
+        historyHtml += app.buildResponseHistoryTable(evt);
+        closeArea.innerHTML = historyHtml;
+    },
+
+    // --- ルーター（画面切り替え） ---
+    router: (viewId) => {
+        document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+        const view = document.getElementById(viewId);
+        if (view) view.classList.add('active');
+    },
+    
+    showView: (viewId) => {
+        app.router(viewId);
+    },
+
+    // --- ユーザー管理 ---
+    showUserManagement: () => {
+        app.router('viewUserManagement');
+        app.renderUserManagement();
+    },
+
+    renderUserManagement: () => {
+        const container = document.getElementById('userList');
+        container.innerHTML = '';
+
+        if (app.data.users.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:40px;">
+                    <div style="font-size:3rem; margin-bottom:12px;">👤</div>
+                    <p style="color:var(--text-secondary);">登録済ユーザーはありません</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="table-container"><table><thead><tr><th>名前</th><th>社員番号</th><th>操作</th></tr></thead><tbody>';
+        app.data.users.forEach((user, index) => {
+            html += `<tr>
+                <td><input type="text" value="${utils.escapeHtml(user.name)}" id="name-${index}" class="input-text" style="width:180px; margin:0;"></td>
+                <td><input type="text" value="${utils.escapeHtml(user.syainNumber)}" id="syain-${index}" class="input-text" style="width:120px; margin:0;"></td>
+                <td>
+                    <button class="btn btn-outline" style="padding:8px 12px; font-size:0.85rem;" onclick="app.updateUser(${index})">💾</button>
+                    <button class="btn btn-danger" style="padding:8px 12px; font-size:0.85rem;" onclick="app.deleteUser(${index})">🗑️</button>
+                </td>
+            </tr>`;
+        });
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+    },
+
+    updateUser: async (index) => {
+        const newName = document.getElementById(`name-${index}`).value.trim();
+        const newSyain = document.getElementById(`syain-${index}`).value.trim();
+        
+        if (!newName || !newSyain) {
+            return app.showToast("名前と社員番号を入力してください", 'error');
+        }
+        
+        if (!utils.isValidSyainNumber(newSyain)) {
+            return app.showToast("社員番号は数字のみで入力してください", 'error');
+        }
+        
+        // 重複チェック
+        if (app.data.users.some((u, i) => i !== index && u.syainNumber === newSyain)) {
+            return app.showToast("この社員番号は既に使用されています", 'error');
+        }
+        
+        await app.loadData();
+        if (index >= app.data.users.length) {
+            return app.showToast("ユーザーが見つかりません", 'error');
+        }
+        
+        app.data.users[index] = { name: newName, syainNumber: newSyain };
+        if (await app.saveData()) {
+            app.showToast("ユーザーを更新しました ✨");
+            app.renderUserManagement();
+        }
+    },
+
+    deleteUser: async (index) => {
+        const user = app.data.users[index];
+        if (!user) return;
+        
+        if (!confirm(`ユーザー「${user.name}」を削除しますか？\n※関連するイベントデータは残ります`)) return;
+        
+        await app.loadData();
+        if (index >= app.data.users.length) {
+            return app.showToast("ユーザーが見つかりません", 'error');
+        }
+        
+        app.data.users.splice(index, 1);
+        if (await app.saveData()) {
+            app.showToast("ユーザーを削除しました");
+            app.renderUserManagement();
+        }
+    },
+
+    // --- イベント管理 ---
+    showEventManagement: () => {
+        app.router('viewDashboard');
+        app.renderDashboard();
+    },
+
+    renderEventManagement: () => {
+        const container = document.getElementById('eventManagementList');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const myEvents = app.data.events.filter(e => e.organizerNo === app.currentUser.syainNumber);
+        if (myEvents.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:40px;">
+                    <div style="font-size:3rem; margin-bottom:12px;">📭</div>
+                    <p style="color:var(--text-secondary);">作成したイベントはありません</p>
+                </div>
+            `;
+            return;
+        }
+
+        myEvents.forEach(evt => {
+            const statusMap = {
+                'PLANNING': { text: '企画中', class: 'status-planning', icon: '📝' },
+                'OPEN': { text: '募集中', class: 'status-open', icon: '📢' },
+                'LOTTERY': { text: '座席抽選中', class: 'status-open', icon: '🎲' },
+                'CLOSED': { text: '決定済', class: 'status-decided', icon: '✅' }
+            };
+            const statusInfo = statusMap[evt.status] || { text: evt.status, class: 'status-closed', icon: '📋' };
+            
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong>${statusInfo.icon} ${utils.escapeHtml(evt.name)}</strong>
+                    <span class="status-badge ${statusInfo.class}">${statusInfo.text}</span>
+                </div>
+                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:8px;">
+                    📅 候補日: ${evt.candidates.length}件
+                </div>
+                <div style="margin-top:12px; display:flex; gap:10px;">
+                    <button class="btn btn-outline" style="padding:8px 16px; font-size:0.85rem;" onclick="app.editEvent('${evt.id}')">✏️ 編集</button>
+                    <button class="btn btn-danger" style="padding:8px 16px; font-size:0.85rem;" onclick="app.deleteEvent('${evt.id}')">🗑️ 削除</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    },
+
+    editEvent: (eventId) => {
+        const panel = document.getElementById(`edit-panel-${eventId}`);
+        if (!panel) return;
+        
+        const isOpen = panel.classList.contains('open');
+        
+        // 全ての編集パネルを閉じる
+        document.querySelectorAll('.card.dimmed').forEach(c => c.classList.remove('dimmed'));
+        document.querySelectorAll('.edit-panel.open').forEach(p => p.classList.remove('open'));
+        
+        if (isOpen) return;
+        
+        const evt = app.data.events.find(e => e.id === eventId);
+        if (!evt) return;
+        
+        const nameInput = document.getElementById(`editName-${eventId}`);
+        const datesInput = document.getElementById(`editDates-${eventId}`);
+        const statusSelect = document.getElementById(`editStatus-${eventId}`);
+        
+        if (nameInput) nameInput.value = evt.name;
+        if (datesInput) datesInput.value = evt.candidates.join('\n');
+        if (statusSelect) statusSelect.value = evt.status;
+        
+        panel.classList.add('open');
+        
+        // 他のカードを暗くする
+        document.querySelectorAll('.card').forEach(card => {
+            if (!card.contains(panel)) card.classList.add('dimmed');
+        });
+        
+        // パネルにスクロール
+        setTimeout(() => {
+            panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 250);
+    },
+
+    deleteEvent: async (eventId) => {
+        const evt = app.data.events.find(e => e.id === eventId);
+        if (!evt) return;
+        
+        if (!confirm(`イベント「${evt.name}」を削除しますか？\nこの操作は元に戻せません。`)) return;
+        
+        await app.loadData();
+        app.data.events = app.data.events.filter(e => e.id !== eventId);
+        
+        if (await app.saveData()) {
+            app.showToast('イベントを削除しました');
+            const activeView = document.querySelector('.view.active')?.id;
+            if (activeView === 'viewDashboard') {
+                app.renderDashboard();
+            } else {
+                app.renderEventManagement();
+            }
+        }
+    },
+
+    renderEditEvent: () => {
+        const evt = app.currentEvent;
+        if (!evt) return;
+        
+        document.getElementById('editEvtName').value = evt.name;
+        document.getElementById('editEvtDates').value = evt.candidates.join('\n');
+        document.getElementById('editEvtStatus').value = evt.status;
+    },
+
+    saveEditEvent: async () => {
+        const name = document.getElementById('editEvtName').value.trim();
+        const datesText = document.getElementById('editEvtDates').value.trim();
+        const status = document.getElementById('editEvtStatus').value;
+        
+        if (!name || !datesText) {
+            return app.showToast("入力項目が不足しています", 'error');
+        }
+        
+        const candidates = datesText.split(/\n|,/).map(d => d.trim()).filter(d => d);
+        
+        // 日付バリデーション
+        const invalidDates = candidates.filter(d => !utils.isValidDate(d));
+        if (invalidDates.length > 0) {
+            return app.showToast(`無効な日付形式: ${invalidDates[0]}`, 'error');
+        }
+
+        const memoryEvt = app.data.events.find(e => e.id === app.currentEvent.id);
+        if (memoryEvt) {
+            memoryEvt.name = name;
+            memoryEvt.candidates = candidates;
+            memoryEvt.status = status;
+        }
+
+        await app.loadData();
+        const targetEvt = app.data.events.find(e => e.id === app.currentEvent.id);
+        
+        if (!targetEvt) {
+            return app.showToast("イベントが見つかりません", 'error');
+        }
+        
+        targetEvt.name = name;
+        targetEvt.candidates = candidates;
+        targetEvt.status = status;
+        targetEvt.updatedAt = new Date().toISOString();
+        
+        if (await app.saveData()) {
+            app.showToast("イベントを更新しました ✨");
+            app.router('viewEventManagement');
+            app.renderEventManagement();
+        }
+    },
+
+    validateDates: (candidates) => {
+        return candidates.every(d => utils.isValidDate(d));
+    },
+
+    saveEditEventInline: async (eventId, opts = { showDashboard: false }) => {
+        const name = document.getElementById(`editName-${eventId}`).value.trim();
+        const datesText = document.getElementById(`editDates-${eventId}`).value.trim();
+        const status = document.getElementById(`editStatus-${eventId}`).value;
+        
+        if (!name || !datesText) {
+            return app.showToast("入力項目が不足しています", 'error');
+        }
+        
+        const candidates = datesText.split(/\n|,/).map(d => d.trim()).filter(d => d);
+        
+        if (!app.validateDates(candidates)) {
+            return app.showToast('候補日は YYYY/MM/DD または YYYY-MM-DD 形式で入力してください', 'error');
+        }
+
+        const memoryEvt = app.data.events.find(e => e.id === eventId);
+        if (memoryEvt) {
+            memoryEvt.name = name;
+            memoryEvt.candidates = candidates;
+            memoryEvt.status = status;
+        }
+
+        await app.loadData();
+        const targetEvt = app.data.events.find(e => e.id === eventId);
+        
+        if (!targetEvt) {
+            return app.showToast('イベントが見つかりません', 'error');
+        }
+        
+        targetEvt.name = name;
+        targetEvt.candidates = candidates;
+        targetEvt.status = status;
+        targetEvt.updatedAt = new Date().toISOString();
+        
+        if (await app.saveData()) {
+            app.showToast("イベントを更新しました ✨");
+            
+            const panel = document.getElementById(`edit-panel-${eventId}`);
+            if (panel) panel.classList.remove('open');
+            document.querySelectorAll('.card.dimmed').forEach(c => c.classList.remove('dimmed'));
+            
+            const activeView = document.querySelector('.view.active')?.id;
+            if (activeView === 'viewDashboard') {
+                app.renderDashboard();
+            } else if (activeView === 'viewEventManagement') {
+                app.renderEventManagement();
+            } else if (opts.showDashboard) {
+                app.showDashboard();
+            } else {
+                app.renderEventManagement();
+            }
+        }
+    },
+
+    cancelEditInline: (eventId) => {
+        const panel = document.getElementById(`edit-panel-${eventId}`);
+        if (panel) panel.classList.remove('open');
+        document.querySelectorAll('.card.dimmed').forEach(c => c.classList.remove('dimmed'));
+    },
+};
+
+// Start
+document.addEventListener('DOMContentLoaded', () => app.init());
+
+</script>
+</body>
+</html>
