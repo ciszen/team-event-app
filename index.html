@@ -762,7 +762,15 @@
     <div id="viewDashboard" class="view">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
             <h3 style="margin:0;">📋 イベント一覧</h3>
-            <div style="display:flex; gap:12px;">
+            <div style="display:flex; gap:12px; align-items:center;">
+                <input type="text" id="eventSearch" class="input-text" placeholder="イベント名で検索..." style="width:260px; padding:10px 14px;">
+                <select id="eventStatus" class="input-text" style="width:160px; padding:10px 14px;">
+                    <option value="ALL">全てのステータス</option>
+                    <option value="PLANNING">企画中</option>
+                    <option value="OPEN">募集中</option>
+                    <option value="LOTTERY">座席抽選中</option>
+                    <option value="CLOSED">決定済</option>
+                </select>
                 <button class="btn btn-outline" onclick="app.showUserManagement()">👥 ユーザー管理</button>
                 <button class="btn" onclick="app.showCreateEvent()">＋ 新規イベント</button>
             </div>
@@ -938,6 +946,11 @@ const app = {
     currentUser: null,
     currentEvent: null,
     isInitialized: false,
+    // フィルタ状態
+    filters: {
+        search: '',
+        status: 'ALL'
+    },
 
     showToast: (message, type = 'success', timeout = 2500) => {
         const container = document.getElementById('toastContainer');
@@ -983,6 +996,21 @@ const app = {
         if (loginNo) {
             loginNo.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') app.login();
+            });
+        }
+
+        // ダッシュボードの検索とステータスフィルタ
+        const searchEl = document.getElementById('eventSearch');
+        const statusEl = document.getElementById('eventStatus');
+        if (searchEl) {
+            const onSearch = utils.debounce((e) => {
+                app.setEventSearch(e.target.value);
+            }, 300);
+            searchEl.addEventListener('input', onSearch);
+        }
+        if (statusEl) {
+            statusEl.addEventListener('change', (e) => {
+                app.setEventStatusFilter(e.target.value);
             });
         }
         
@@ -1212,15 +1240,18 @@ const app = {
         const list = document.getElementById('eventList');
         const emptyState = document.getElementById('emptyState');
         list.innerHTML = '';
-        
-        if (app.data.events.length === 0) {
+        // フィルタ適用
+        const filtered = app.applyEventFilters();
+
+        if (filtered.length === 0) {
             emptyState.style.display = 'block';
+            emptyState.querySelector('h3').textContent = '該当するイベントはありません';
             return;
         }
         emptyState.style.display = 'none';
-        
+
         // 新しい順に表示
-        [...app.data.events].reverse().forEach(evt => {
+        [...filtered].reverse().forEach(evt => {
             const orgUser = app.data.users.find(u => u.syainNumber === evt.organizerNo);
             const orgName = orgUser ? utils.escapeHtml(orgUser.name) : evt.organizerNo;
             const statusMap = {
@@ -1294,6 +1325,30 @@ const app = {
             });
             list.appendChild(div);
         });
+    },
+
+    // イベントのフィルタ適用
+    applyEventFilters: () => {
+        const search = (app.filters.search || '').toLowerCase();
+        const status = app.filters.status || 'ALL';
+        let events = app.data.events || [];
+        if (status && status !== 'ALL') {
+            events = events.filter(e => e.status === status);
+        }
+        if (search) {
+            events = events.filter(e => (e.name || '').toLowerCase().includes(search));
+        }
+        return events;
+    },
+
+    setEventSearch: (val) => {
+        app.filters.search = (val || '').trim();
+        app.renderDashboard();
+    },
+
+    setEventStatusFilter: (val) => {
+        app.filters.status = val || 'ALL';
+        app.renderDashboard();
     },
 
     // --- イベント詳細 ---
